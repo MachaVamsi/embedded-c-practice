@@ -1,0 +1,17 @@
+# Build output
+Debug/
+Release/
+build/
+
+# Object files
+*.o
+*.d
+
+# Executables
+*.elf
+*.hex
+*.bin
+*.map
+
+# Temporary files
+*.launch
