@@ -12,7 +12,7 @@ char *myStr0 = "ABCDE"; // Pointer myStr0 will be shown in datasignment but init
 char myStr1[] = "112233";
 char myStr2[7] = "445566";
 char myStr3[] = "778899";
-const char myStr4[7] = "122121"; // Text or Code Segment, rodata
+ char myStr4[7] = "122121"; // Text or Code Segment, rodata
 
 void  practice4(void)
 {

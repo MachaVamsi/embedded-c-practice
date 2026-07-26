@@ -1,0 +1,37 @@
+Q1. What is the difference between these two?
+    char str[] = "Hello";
+    char *str = "Hello";
+Ans: 
+    char str[] = "Hello"; creates a character array and copies the string literal into that array. 
+    If declared inside a function, the array is stored on the stack and can be modified.
+    char *str = "Hello"; creates a pointer variable that points to a string literal,
+    which is typically stored in the read-only data section (.rodata). The pointer itself can be changed to point somewhere else, 
+    but the string literal should not be modified because doing so results in undefined behavior.
+
+Q2. what is the difference between sizeof(str), strlen(str)?
+Ans: sizeof() is a compile-time operator that returns the size in bytes of a type or object. For arrays, it returns the total allocated size, 
+    including any null terminator if it's part of the array initialization. For pointers, it returns the size of the pointer itself (typically 4 or 8 bytes),
+    not the length of the string.
+    strlen() is a runtime library function that counts characters until it reaches the null terminator, so its time complexity is O(n), 
+    whereas sizeof() is O(1)` because the compiler already knows the size.
+    +In embedded systems, using sizeof() instead of strlen() when transmitting strings over UART, SPI, or CAN can result in sending unused or garbage bytes.
+
+Q3: Why return a pointer when the copy has already been performed?
+    char *strcpy(char *dest, const char *src);
+    void strcpy(char *dest, const char *src);
+Ans:
+    strcpy() returns char * instead of void for two main reasons:
+    It allows the caller to immediately use the destination pointer in expressions, function chaining, or assignments.
+    During copying, the internal dest pointer is incremented until it reaches the null terminator. Therefore, the implementation saves the original 
+    destination pointer (for example, char *start = dest) and returns that original pointer so the caller still receives the address of the beginning of the 
+    copied string.
+
+Q4. Why strcpy doesnot check size? Wh is it dangerous and what is the alternative?
+    char dest[5];
+    strcpy(dest, "Embedded");
+Ans:
+    strcpy() copies bytes until it encounters a null terminator without checking the destination capacity. If the destination buffer is too small, 
+    it writes beyond the end of the array, causing a buffer overflow that may corrupt adjacent memory or crash the program. strcpy() cannot verify 
+    the destination size because arrays decay to pointers when passed to functions, so the function receives only a char *, not the array length. 
+    strncpy() is commonly suggested, but it is not completely safe because it does not guarantee a null terminator when the source string is longer 
+    than or equal to the specified limit.

@@ -9,23 +9,10 @@
 #include <stdio.h>
 size_t my_strlen(const char * str);
 
-char is_alphnum(char s){
-	if (((s >= 'A' && s <= 'Z') || (s >= 'a' && s <= 'z') || (s >= '0' && s <= '9'))){
-		return 1;
-	}
-	return 0;
-}
+char convert_case(char s);
+int is_alphnum(char s);
 
-
-char convert_case(char s){
-	if (s >= 'A' && s <= 'Z') {
-		return s+32;
-	}
-	return s;
-}
-
-char palindrome(){
-	char strr[] =  "A man, a plan, a canal: Panama"; //"0P"; //"car, r78ac";
+char chk_palindrome(const char *strr){
 	int N = my_strlen(strr);
 
 	int i=0;
@@ -39,15 +26,25 @@ char palindrome(){
 					j--;
 				}
 		else{
-			if(!(convert_case(strr[i])== convert_case(strr[j]))){
-				printf("not a palidrome");
-
+			if((convert_case(strr[i])!= convert_case(strr[j]))){
 				return 0;
 			}
 			i++;
 			j--;
 		}
 	}
-	printf("its a palidrome");
 return 1;
+}
+
+
+
+void palindrome(){
+	char ret;
+	ret = chk_palindrome("A man, a plan, a canal: Panama")  ; // //"0P"; //"car, r78ac";
+	if (ret){
+		printf("its a palindrome");
+	}
+	else{
+		printf("not a palindrome");
+	}
 }

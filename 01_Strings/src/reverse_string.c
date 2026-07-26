@@ -22,11 +22,24 @@ void reverse_sentence(){
 	char strr[] = "How Are You ?";
 	int N = my_strlen(strr);
 	int i=0, j= N-1;
-	while(i<=j){
+	while(i<j){
 		swap(&strr[i], &strr[j]);   //pass the value using address i.e. pass by reference
 		i++;
 		j--;
 	}
 	printf("%s", strr);
+}
+
+
+void reverse(char *s){
+	// using pointer arithmetic
+
+	char *left = s;
+	char * right = s+ my_strlen(s)-1;
+	while(left < right){
+		swap(left, right);
+		left++;
+		right--;
+	}
 }
 
