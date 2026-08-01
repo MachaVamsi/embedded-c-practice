@@ -1,0 +1,74 @@
+Q1: Which implementation do you think is better?
+    int check_bit(int num, int pos)
+    {
+        return num & (1U << pos);
+    }
+
+    int check_bit(int num, int pos)
+    {
+        return (num & (1U << pos)) != 0;
+    }
+
+Ans: My answer: Version B. It has a well-defined interface: it always returns a boolean-like value (0 or 1). 
+    The caller doesn't need to know that bit 5 would return 32, bit 7 would return 128, and so on. 
+    You'll see Version A a lot in embedded code because sometimes you want the mask back, not just a boolean. Many embedded codebases prefer it because it's shorter and directly expresses "is any masked bit set?"
+
+Q2: Why does num & 1 determine odd/even?
+Ans:
+    In binary, every bit except the least significant bit (LSB) has an even weight (2, 4, 8, 16...). Only the LSB has a weight of 1. 
+    Therefore, if the LSB is 0, the sum of all set bits is even. If the LSB is 1, an extra 1 is added to an even sum, making the number odd. 
+    num & 1 isolates the LSB, so it tells us whether the number is odd or even.
+
+Q3: 1<<31 . Is it safe?
+Ans:
+    1 is a signed int. Left-shifting a signed value into the sign bit causes undefined behavior according to the C standard.
+
+Q4: Why embedded engineers prefer hex over binary?
+Ans:
+    Easier to read than long binary strings.
+    Every hex digit represents exactly 4 bits.
+    Datasheets and register maps use hexadecimal.
+    Debuggers and memory windows display hexadecimal.
+
+Q5: Why do we manipulate registers using masks instead of assigning values directly?
+Ans: To not loose other bits data
+
+Q6: Explain the difference between logical operators and bitwise operators.
+
+Q7. AND (&) -Usecases   | OR (|) -Usecases          | XOR (^)                       |  NOT (~)        
+    Reading a bit       | Setting bits              | Error detection               | Mostly to create masks.
+    Clearing a bit      | GPIOA->ODR |= (1U << 5);  | Checksums                     |
+    Extracting fields   |                           | Encryption (simple forms)     |
+    Testing flags       |                           | XOR swap (though rarely used) |
+
+Q8. Bitwise operayion on signed bits?
+Ans 
+    Different CPUs and compilers can behave differently for signed right shifts. This is one reason embedded developers often prefer unsigned types for bit manipulation.
+    int x = -8; x >> 1 results in?
+    11111100 or 01111100 ?
+
+Q9:  For setting a bit in register? Suppose a register field starts at bit P and has width W.
+    reg &= ~(MASK << POSITION);
+    reg |= (VALUE << POSITION);
+
+    reg &= ~(((1U << W) - 1U) << P);
+    reg |= (value << P);
+    That's why CMSIS drivers and vendor HALs often use formulas or macros instead of hardcoded numbers.
+
+Q10: Is this one CPU instruction? ? GPIOA->ODR |= (1U << 5);  
+Ans: 
+    temp = GPIOA->ODR;      // Read
+    temp = temp | (1U<<0);  // Modify
+    GPIOA->ODR = temp;      // Write
+
+Q11: Clear and set bits single line of same register
+Ans:
+    PC_ODR = (PC_ODR | 0x18) & 0xDF; 
+    PB_ODR &= 0xDF, PC_ODR |= 0x40;
+
+Q12 : | Expression    | Meaning                                                                                                                                                  |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `x & (x - 1)` | clear the rightmost set bit                                                                                                                            |
+| `x & (-x)`    | Isolates the rightmost set bit                                                                                                                           |
+| `x & (x + 1)` | Tests whether `x` is a sequence of consecutive trailing 1s (used in specific bit hacks, like the alternating-bits solution after the XOR transformation) |
+num |= (num + 1);  sets rightmost unset bit. my version is also there check code/repo. How can I create a mask that contains only the first zero bit 
