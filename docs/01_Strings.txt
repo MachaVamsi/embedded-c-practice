@@ -35,3 +35,11 @@ Ans:
     the destination size because arrays decay to pointers when passed to functions, so the function receives only a char *, not the array length. 
     strncpy() is commonly suggested, but it is not completely safe because it does not guarantee a null terminator when the source string is longer 
     than or equal to the specified limit.
+
+Q6:  Will this always crash?
+    char *p = "Hello";
+    p[0] = 'Y';
+Ans:
+    It results in undefined behavior because the program attempts to modify a string literal, which is typically stored in read-only memory.
+     It may crash, it may appear to work, or it may produce unexpected behavior. The C standard does not define what must happen.
+     The important phrase is: Undefined Behavior (UB)

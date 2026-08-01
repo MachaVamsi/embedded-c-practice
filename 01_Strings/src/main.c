@@ -17,19 +17,19 @@ void call_analyze_string();
 void call_duplicate_removal();
 
 int main(){
-//	token_pasting_operator();
-//	stringizing_operator();
-//	pratice2();
-//	practice1();
-//	string_sm();
-//	practice3();
-//	string_traversal();
-//	own_libraries();
-////	practice4();
-//	reverse_sentence();
-//	printf("\n segments in the input string is %llu", count_string_seg("Hello, my name is vamsi!"));
-//	anagaram();
-//	palindrome();
-//	call_analyze_string();
+	token_pasting_operator();
+	stringizing_operator();
+	pratice2();
+	practice1();
+	string_sm();
+	practice3();
+	string_traversal();
+	own_libraries();
+//	practice4();
+	reverse_sentence();
+	printf("\n segments in the input string is %llu", count_string_seg("Hello, my name is vamsi!"));
+	anagaram();
+	palindrome();
+	call_analyze_string();
 	call_duplicate_removal();
 }
