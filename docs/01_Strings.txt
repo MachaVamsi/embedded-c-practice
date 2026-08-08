@@ -43,3 +43,4 @@ Ans:
     It results in undefined behavior because the program attempts to modify a string literal, which is typically stored in read-only memory.
      It may crash, it may appear to work, or it may produce unexpected behavior. The C standard does not define what must happen.
      The important phrase is: Undefined Behavior (UB)
+
