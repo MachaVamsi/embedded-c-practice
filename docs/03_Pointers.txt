@@ -1,0 +1,278 @@
+Q1: Operators : Address-of(&), Dereference(*)
+    int x = 25; Compiler might store it as --> "Go to address 1000 and read the value."
+    int *p = &x; A pointer stores an address, not the value.
+    Address      Value
+    1000         25   <-- x
+    2000         1000 <-- p
+
+Q2: printf("%p\n", (void *)p);
+    void *ptr;
+
+    int x = 10;
+    char c = 'A';
+    float f = 3.14;
+
+    ptr = &x;
+    ptr = &c;
+    ptr = &f;
+
+    The same void * variable can store all these addresses. void * is a generic pointer type. %p expects a void *, so we cast pointers when printing addresses
+
+Q3:  *p = 100;
+Ans it does not change p. Instead, it says:
+    Read the value stored in p → 1000, 
+    Go to address 1000, 
+    Store 100 there, (because *p means "go to address 1000 and read the value.")
+    Memory becomes:
+    Address      Value
+    1000         100     <-- x
+    2000         1000    <-- p
+
+
+Q4: int *p = NULL;
+    printf("%d\n", *p);
+Ans ✅ It is undefined behavior. In practice, it often causes a segmentation fault (or HardFault on an MCU).
+Why?  In C, it's essentially   p = 0; So the pointer contains address: 0x00000000
+      *p ==> "Go to address 0x00000000 and read an int."
+      On a typical desktop OS: Address 0x00000000
+                                            ↑
+                                        Access denied
+    The operating system protects this memory, so the program usually crashes with a segmentation fault.
+
+    On an STM32 Microcontroller , Address 0x00000000 is not necessarily invalid.It often maps to: Flash memory, The vector table (Reset Handler, ISR addresses), 
+    Boot memory (depending on configuration) . So it may lead to, read some unexpected value, or trigger a HardFault, or  behave differently depending on the memory map.
+
+    This is why the C standard simply says: Dereferencing a NULL pointer is undefined behavior. It deliberately does not promise what will happen.
+    Rule to Remember : Always check before dereferencing if a pointer might be NULL.
+
+Q5: in int *p,  What does p++ do ?
+    The compiler sees that p is an int *.
+    "How big is one int?" .sizeof(int) = 4 bytes
+    so compiler generates its code equivlent to New Address = Old Address + sizeof(pointed_type)
+    So p now points to the next integer, not the next byte.
+    This is why pointer arithmetic is called scaled arithmetic.
+
+Q6: Why does p++ move by 1 byte for a char *, but q++ moves by 4 bytes for an int *?
+    Pointer arithmetic is scaled by the size of the data type it points to. When we increment a pointer, the compiler adds sizeof(pointed_type) 
+    bytes to the stored address so that the pointer points to the next object of that type.
+    Simpler---> p++ moves the pointer to the next element, not the next byte. The distance moved is sizeof(*p) bytes
+
+    | Pointer Type | `sizeof(*pointer)` | `pointer++` moves by |
+    | ------------ | ------------------ | -------------------- |
+    | `char *`     | 1                  | 1 byte               |
+    | `short *`    | 2                  | 2 bytes              |
+    | `int *`      | 4                  | 4 bytes              |
+    | `float *`    | 4                  | 4 bytes              |
+    | `double *`   | 8                  | 8 bytes              |
+
+
+Q7:  Are arrays and pointer same?
+Ans: No. Pointer is varaible stoed in memory and its value is address of another varible.
+    In most expressions, an array name "decays" (is converted) to a pointer to its first element.
+    An array is not pointer, "An array is converted to a pointer when needed."
+
+Q8: Why is arr++ illegal but p++ is legal?
+Ans not legal in C as its not another varaible as pointer.
+    An array name can decay to a pointer in many expressions. But the array name itself is not a modifiable pointer variable.
+    "p is a pointer variable that stores an address, so its value can be modified. arr is the name of the array object, not a modifiable pointer variable.
+    Although arr decays to a pointer in many expressions, the array itself cannot be incremented."
+
+
+Q9: Is arr , &arr same? 
+Ans: No, their numerical value is same but both are not same.
+    As stated earlier, arr is name of the object. Mostly array decays to pointer to its first element. so arr decays to &arr[0]
+    &arr Address of the entire array object. It points to entire object, not first element.
+    in memory:
+                    Entire Array
+                +-----------------------+
+        1000 --->|10|20|30|40|50|
+                +-----------------------+
+
+        arr      -----> 1000
+        &arr     -----> 1000.  They have the same numeric value, but different types.
+        | Expression | Meaning                                | Type         |
+        | ---------- | -------------------------------------- | ------------ |
+        | `arr`      | Pointer to first element (after decay) | `int *`      |
+        | `&arr`     | Pointer to the entire array            | `int (*)[5]` |
+
+    arr + 1 ----> 1004
+    &arr + 1-----> 1020 (5*4bytes) .  Pointer arithmetic moves by sizeof(pointed_type).
+
+Q10: Assume a 64-bit PC (like your development machine).
+    Predict:
+    sizeof(arr) =  20. This is one of the few exceptions to array-to-pointer decay.
+    sizeof(p) = 8.  on a 64 bit architecture adrres are 64 bits.
+    | Platform           | `sizeof(int)` | `sizeof(int *)` |
+    | ------------------ | ------------: | --------------: |
+    | 32-bit MCU (STM32) |             4 |               4 |
+    | 64-bit PC          |             4 |               8 |
+
+    sizeof(arr) depends on the array length and element size. sizeof(arr) gives the size of the whole array because the array does not decay to a pointer inside sizeof.
+    sizeof(p) depends only on the architecture because it's just a pointer.
+
+Q11. What is sizeof(&arr)?
+Ans : 8
+
+    int arr[5]; --> Type:int[5] 
+    sizeof(arr) --> sizeof(int[5])  --> 5x4 =20
+
+    &arr is address of entire array. 
+    &arr --> Type: int (*)[5]
+    sizeof(&arr) -->  its now a pointer type not an array. so in 64 bit PC value is 8.
+    sizeof(pointer) = 8
+
+Q12. Why doesn't sizeof(arr) decay?
+Ans: Because sizeof is a compile-time operator that needs the complete type. If arrays always decayed to pointers, 
+    the compiler would lose the array length information and could never compute the array's total size. Preserving 
+    the array type inside sizeof makes the operator useful and efficient. So designers made it an exception.
+
+Q13. Difference between arr[2], *(arr+2) ?
+Ans Both are same. Infact it definition [] in C.
+    a[b] = *(a + b)
+
+Q14.  is 2[arr], is legal ? and why?
+Ans: It is legal , It exists because of how the C language defines the [] operator, not because anyone thought 2[arr] was a good programming style.
+     No one uses it,  Because it's terrible for readability.
+     a[b] = *(a+b)
+     a+b = as b+a  .  addition is commutative.
+     so *(a+b) = *(b+a) ==> b[a]
+     so arr[2] = 2[arr]
+
+Q15. Which one is legal ?
+    A) int arr[5];                          B)  void f(int *arr){
+      arr++;                                        arr++;     }
+
+Ans:  B.  In the first case, arr is an array object. An array name is not a modifiable lvalue.
+        In the second case, arr is a pointer parameter, i.e., a local pointer variable. Modifying it only changes the local copy of the address.
+        But when passed as a function argument, something special happens.
+
+        The parameter int *dest,     receives a copy of the address of the first element.
+        So inside the function, dest is no longer an array.             It is a pointer variable.
+
+        Inside my_memcpy()                          | In main() 
+            Parameter:                              | Array
+            int *dest                               | 1000 10
+            Memory:                                 | 1004 20
+            4000   1000    <-- dest                 | 1008 30
+            Now there is a variable.                | No variable exists that stores 1000.
+            So                                      | The name dest refers to the array object.
+            dest++;                                 | So
+            means                                   | dest++;
+            4000   1004                             
+            Perfectly legal.                        | ❌ Illegal.
+
+Q16 : Three Expressions You Must Never Confuse
+Ans     | Expression | Meaning                                           |
+        | ---------- | ------------------------------------------------- |
+        | `*p++`     | `*(p++)`                                          |
+        | `(*p)++`   | Increment the **value** pointed to by `p`         |
+        | `*++p`     | Increment the **pointer first**, then dereference |
+
+
+Q17 : Why swap(int a, int b) doesnot work aand swap(int *a, int *b) works?
+Ans "The pointer variables are local copies, but they contain the addresses of the caller's variables. 
+    Dereferencing those pointers accesses the original memory, allowing the function to modify the caller's data."
+
+Q18: What is the type addressof varibale and type og the address of a pointer?
+Ans  type of address of varible: int *  ==>  int * p= &x
+     type of address of pointer int **  >> int ** pp = &p
+
+
+q19 :  Pass by value 3 types
+        1. Pass by Value . A normal varible is passed
+        2. Pass-by-value of a pointer. A pointer is passed by value.
+        3. Pass the address of a pointer. 
+            void fun(int x);        void fun(int **pp);         void fun(int **pp);
+            int a = 10;             int *ptr = &a;              int *ptr = &a;
+            fun(a);                 fun(&ptr);                  fun(&ptr);
+
+Q20. Does C support pass-by-reference?
+Ans  No. C only supports pass-by-value. When a pointer is passed to a function, the pointer itself is passed by value (a copy of the address). 
+        This allows the function to modify the object being pointed to, but not the caller's pointer variable. To modify the caller's pointer, 
+        you must pass a pointer to the pointer (int **).
+        Any object can be modified if you have its address and you have permission to write to it.
+
+Q21 main()
+
+        int arr[5]
+            │
+            │ print(arr)
+            ▼
+        Compiler changes parameter
+
+        void print(int *arr)
+
+        Inside print:
+        arr is a POINTER, not an ARRAY
+
+Q22  Are these different?
+        void f(int a[]);
+        void f(int a[10]);
+        void f(int *a);
+    No. Inside function parameter lists, all three are treated as void f(int *a). The array size in the parameter list is ignored by the compiler for the function type.
+
+Q23 Why doesn't the compiler simply detect this?
+    void change(int arr[])
+    {
+        arr[100] = 99;
+    }
+Ans: The answer is because inside the function there is no array anymore.There is only: int *arr; A pointer has no built-in length information.
+
+
+Q24 :  Why can't the function compute the number of elements using: sizeof(arr) / sizeof(arr[0])?
+            void printSize(int arr[])
+        {
+            printf("%zu\n", sizeof(arr));
+        }
+Ans : Because arr is a pointer inside the function, sizeof(arr) is the size of the pointer (typically 8 bytes on a 64-bit system), not the size of the original array. The function has lost the array length information.
+
+
+Q25: is Returning Pointers from Functions safe?
+
+    Not every pointer returned from a function is wrong.
+    Some are perfectly safe.
+    Some are catastrophic.
+    Your job is to know the difference.
+
+
+
+Q26 : what is a Dangling Pointer?
+
+    A pointer that points to memory that is no longer valid. 
+
+Q27. Dereferencing a dangling pointer is dangerous why?
+Ans Because you're reading memory that no longer belongs to your program's object x.
+    The behavior is undefined.
+    "It returns the address of a local variable. The local variable's lifetime ends when the function returns, 
+    so the returned pointer becomes a dangling pointer. Dereferencing it results in undefined behavior."
+
+Q28: Dereferencing static varaible is safe.
+
+    | Property | Local Variable | Static Local Variable |
+    | -------- | -------------- | --------------------- |
+    | Scope    | Function       | Function              |
+    | Lifetime | Function call  | Entire program        |
+
+    "static local variables are created only once and have program lifetime. Although their scope is limited to the function, 
+    every call to the function returns the address of the same object. Therefore p1 and p2 point to the same memory location."
+
+
+Q29. Why doesn't this swap the caller's pointers?
+        void swap(int *a, int *b)
+        {
+            int *temp = a;
+            a = b;
+            b = temp;
+        }
+
+        "The parameters a and b are local copies of the caller's pointer variables. Swapping these local copies does not modify the caller's pointers. 
+        To modify the caller's pointer variables, we must pass their addresses (int **) and swap *a and *b."
+
+
+Q30.
+     | Declaration          | Pointer can move? | Data can change through pointer? |
+| -------------------- | ----------------- | -------------------------------- |
+| `int *p`             | ✅ Yes             | ✅ Yes                            |
+| `const int *p`       | ✅ Yes             | ❌ No                             |
+| `int *const p`       | ❌ No              | ✅ Yes                            |
+| `const int *const p` | ❌ No              | ❌ No                             |

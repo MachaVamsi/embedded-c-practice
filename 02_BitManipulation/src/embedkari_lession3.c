@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<stdint.h>
+#include <limits.h>
 
 uint8_t swap_nibble(uint8_t num){
 	uint8_t  nibble =0;
@@ -45,31 +46,46 @@ void binary_arr_soring(){
 	}
 	printf(" is the sorted array\n");
 }
+//
+//int reverseBits(int n) {
+//    int i=0;
+//    int j= 31;
+//    int left, right;
+//    while(i<j){
+//        left = n & (1u<<j);
+//        right = n & (1u<<i);
+//        if (left ==0){
+//             n= n & (~(1u>>(j-i)));
+//        }
+//        else {
+//             n= n | left>>(j-i);
+//        }
+//        if (right==0) {
+//            n = n & (~(1u<<(j)));
+//        }
+//        else {
+//            n = n | right<<(j-i);
+//        }
+//
+//        i++;
+//        j--;
+//    }
+//    return n;
+//}
 
-int reverseBits(int n) {
-    int i=0;
-    int j= 31;
-    int left, right;
-    while(i<j){
-        left = n & (1u<<j);
-        right = n & (1u<<i);
-        if (left ==0){
-             n= n & (~(1u>>(j-i)));
-        }
-        else {
-             n= n | left>>(j-i);
-        }
-        if (right==0) {
-            n = n & (~(1u<<(j)));
-        }
-        else {
-            n = n | right<<(j-i);
-        }
+uint32_t reverseBits(uint32_t num)
+{
+    uint32_t result = 0;
 
-        i++;
-        j--;
+    for(int i = 0; sizeof(num) * CHAR_BIT; i++)  // while(num)  based on loop condition this
+    	//does reverse of whole 32 bits or upto or just revers upto visible bits
+    {
+        result <<= 1;
+        result |= (num & 1U);
+        num >>= 1;
     }
-    return n;
+
+    return result;
 }
 
 //convert big endian to littel endian

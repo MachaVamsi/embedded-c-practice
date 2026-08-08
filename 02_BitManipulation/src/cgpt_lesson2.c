@@ -115,6 +115,25 @@ int next2power(int num){
 
 }
 
+uint32_t extract_field(uint32_t reg, uint8_t start, uint8_t width)
+{
+    uint32_t mask = (1U << width) - 1U;
+    return (reg >> start) & mask;
+}
+
+uint32_t set_field (uint32_t reg, uint8_t start, uint8_t width, uint8_t value){
+	uint32_t mask = (1U << width) - 1U;
+	reg &= ~(mask << start);
+	reg |= (value & mask) << start;
+	return reg;
+}
+
+
+uint32_t toggle_alt_field(uint32_t num){
+	int mask = 0x55;  //0xAA  based on which alternating fields
+	num = num ^ mask;
+}
+
 
 /*
  * Extract bit field
